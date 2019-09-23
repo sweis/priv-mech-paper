@@ -33,12 +33,18 @@
 
 \maketitle% this prints the handout title, author, and date
 
-\begin{abstract} \noindent This is an overview of common tools and definitions
+ \begin{abstract} \noindent This is an overview of common tools and definitions
 for anonymizing data or privately computing with othe parties. It is roughly in
 order of practicality and maturity. \end{abstract}
 
-\section{Lossy Techniques} \textbf{Minimization} or \textbf{redaction} simply
-stops collecting or removes data that are not necessary.
+\section{Lossy Techniques} \textbf{Minimization} refers to collecting only the
+minimal data necessary for a specific purpose. \textbf{Redaction} deletes or
+censors data which has already been collected.
+
+%\begin{marginfigure} \includegraphics[width=\linewidth]{redacted}
+%\caption{Redaction is heavily used in government and legal documents.}
+%\label{fig:binned} \end{marginfigure}
+
 
 \textbf{Aggregation} transforms a set of individual values to reduced set of
 values. Summing or averaging are the most common aggregation operations.
@@ -54,36 +60,41 @@ Alice, Bob, and Carol’s salary, you can learn Carol’s salary.
 while attempting to maintain utility. This includes both quantitative values
 like times or locations as well as qualitative values like names.
 \textbf{Binning} or \textbf{bucketing} generalizes quantitative values to
-buckets or ranges through rounding or truncation. \footnote{Common examples are
+buckets or ranges through rounding or truncation. Common examples are
 truncating GPS coordinates to 3 decimal places or rounding time values to the
-nearest 15 minute period.}
+nearest 15 minute period.
+
+\begin{marginfigure} \includegraphics[width=\linewidth]{binned}
+\caption{An example map of aggregated geolocation data, binned by neighborhood
+and time.}
+\label{fig:binned} \end{marginfigure}
+
 
 \section{k-Anonymity and Extensions}
 
 Implicit in binning values for privacy is the notion of safety in numbers --
 that an individuals’ data will be grouped with others in the same bin and that
-they will have plausible deniability. The notion of
-\textbf{k-anonymity} \cite{DBLP:journals/ijufks/Sweene02} is that at least k
-people will be in any given bin or group. Aggregated data, APIs, or
-visualization tools often have minimum thresholds before returning any data, so
-are k-anonymous in practice. \footnote{Google often uses k values of 1000 in
-their ads and analytics products. Facebook has used it as low as 20 for ads
-products.}
+they will have plausible deniability. The notion of \textbf{$k$-anonymity}
+\cite{DBLP:journals/ijufks/Sweene02} is that at least $k$ people will be in any
+given bin or group. Aggregated data, APIs, or visualization tools often have
+minimum thresholds before returning any data, so are $k$-anonymous in practice.
+Google often uses $k$ values of 1000 in their ads and analytics
+products. Facebook has used it as low as 20 for ads products.
 
-K-anonymity has some privacy issues in practice. First, some bins of data may be
-homogenous and all share sensitive traits. For example, a k-anonymous set of
+$K$-anonymity has some privacy issues in practice. First, some bins of data may be
+homogenous and all share sensitive traits. For example, a $k$-anonymous set of
 geolocations around a specific health clinic might imply health status for that
 entire group. A second problem is that background knowledge can be joined to a
 k-anonymous data set and be used to deanonymize people.
 
 \textbf{L-diversity} \cite{DBLP:conf/icde/MachanavajjhalaGKV06} is an extension
-of k-anonymity that addresses the homogeneity issue by ensuring that sensitive
-traits among bin have at least l distinct values.
-\textbf{T-closeness} \cite{DBLP:conf/icde/LiLV07} is a further refinement that
-ensures that those distinct values are distributed similarly to the population
-that data are drawn from. Neither l-diversity nor t-closeness have wide adoption
-in practice, though Google offers an l-diversity measurment in their data loss
-pervention API.
+of $k$-anonymity that addresses the homogeneity issue by ensuring that sensitive
+traits among bin have at least $l$ distinct values. \textbf{$T$-closeness}
+\cite{DBLP:conf/icde/LiLV07} is a further refinement that ensures that those
+distinct values are distributed similarly to the population that data are drawn
+from. Neither $l$-diversity nor $t$-closeness have wide adoption in practice,
+though Google offers an $l$-diversity measurment in their data loss pervention
+API \cite{google-risk-analysis}.
 
 Pseudonymization and Tokenization \textbf{Pseudonymization} or
 \textbf{tokenization} means replacing sensitive values like names, credit card
@@ -100,11 +111,16 @@ input whose output is indistinguishable from randomness. PRFs have similar
 security properties as random lookup tables, but without having to store the
 relationship. HMACs like HMAC-SHA256 are often used as PRFs in practice.
 
-\textbf{Format preserving encryption} \cite{DBLP:conf/sacrypt/BellareRRS09} (FPE)
-entails encrypting sensitive fields such that the output ciphertext has the same
-format as the input. For example, an format-preserving encrypted credit card
-would have 16 decimal digits. AES FFX mode \cite{dworkin2016recommendation} is
-one recent standard for FPE encryption.
+\textbf{Format preserving encryption} \cite{DBLP:conf/sacrypt/BellareRRS09}
+(FPE) entails encrypting sensitive fields such that the output ciphertext has
+the same format as the input. For example, an format-preserving encrypted credit
+card would have 16 decimal digits. AES FFX mode \cite{dworkin2016recommendation}
+is one recent standard for FPE encryption.
+
+\begin{marginfigure}
+\includegraphics[width=\linewidth]{ffx}
+\caption{Illustration of the FFX format preserving encryption mode} \label{fig:ffx}
+\end{marginfigure}
 
 Historically, \textbf{one-way functions} have often been misused for
 pseudonymization. Many examples of re-identification have occurred when someone
@@ -127,8 +143,8 @@ the US Census \cite{census-differential-privacy}, Apple
 \cite{apple-differential-privacy}, Google \cite{google-differential-privacy},
 Facebook \cite{facebook-url-release}, and Uber \cite{uber-differential-privacy}
 to protect research and user data. Fundamentally, achieving differential privacy
-means adding some form of noise or randomization while sacrificing accuracy.
-In its most basic form, differential privacy specifies a numerical bound,
+means adding some form of noise or randomization while sacrificing accuracy. In
+its most basic form, differential privacy specifies a numerical bound,
 $\epsilon$, on how much an algorithm’s output can change between two neighboring
 datasets that only differ in a single element. Part of the value of differential
 privacy is that $\epsilon$-private systems can be composed with easily
@@ -156,55 +172,68 @@ a function with sensitivity 1.} \label{fig:laplace} \end{marginfigure}
 \textbf{Local differential privacy} refers to applying a privacy mechanism
 locally before sending data to a centralized server. This is relevant for
 collecting telemetry or data from client-side devices or browsers. Both
-Apple\cite{apple-local-differential-privacy} and Google
+Apple \cite{apple-local-differential-privacy} and Google
 \cite{erlingsson2014rappor} developed locally private systems for data
 collection.
 
 Differential privacy academic literature tends to be oriented to one-shot
 releases of data, like the US Census, or a fixed set of database queries. In
 practice, these mechanisms may be difficult to apply to fast-changing databases,
-data with adversarial inputs, or unbounded numbers of queries. Synthetic Data
-Synthetic data involves taking real data and generating fake data sets that
-preserve statistical properties. Machine learning models trained on real data
-points can often be used to also generate sets of realistic-looking synthetic
-data. There are risks that unintentionally memorized data embedded in machine
-learning models could be output in synthetic data sets. Because of this risk,
-differential privacy is often coupled with synthetic data generation to ensure
-that output is private. NIST recently ran a contest for generating such
-differentially private synthetic data sets \cite{nist-synthetic-data}.
+data with adversarial inputs, or unbounded numbers of queries.
+
+\section{Synthetic Data}
+
+\textbf{Synthetic data} involves taking real data and generating fake data sets
+that preserve statistical properties. Machine learning models trained on real
+data points can often be used to also generate sets of realistic-looking
+synthetic data. There are risks that unintentionally memorized data
+\cite{DBLP:journals/corr/abs-1802-08232} embedded in machine learning models
+could be output in synthetic data sets. Because of this risk, differential
+privacy is often coupled with synthetic data generation to ensure that output is
+private. NIST recently ran a contest for generating such differentially private
+synthetic data sets \cite{nist-synthetic-data}.
 
 \section{Secure Enclaves}
 
 \textbf{Secure enclaves} are a CPU technology that provide a safe place to run
 code and perform computations on an otherwise unsafe platform. Intel Software
-Guard Extensions (SGX) \cite{intel-sgx} is one example of a more widely available enclave
-technology. In the context of privacy, enclaves allow one party (e.g. a
-regulator) to compute over another party’s private data (e.g. a service
-provider) without learning any of the service provider’s data. Furthermore, the
-service provider would not be able to know what a regulator is even searching
-for.
+Guard Extensions (SGX) \cite{intel-sgx} is one example of a more widely
+available enclave technology. In the context of privacy, enclaves allow one
+party (e.g. a regulator) to compute over another party’s private data (e.g. a
+service provider) without learning any of the service provider’s data.
+Furthermore, the service provider would not be able to know what a regulator is
+even searching for.
 
-SGX is the basis for multiple privacy-preserving machine learning schemes. The
-biggest barriers to adoption at this time is the availability of SGX in deployed
-servers and the lack of experience in enclave development by most parties. SGX
-is available on Microsoft Azure under the name Confidential Computing. Microsoft
-is also making software tools available a part of the new Confidential Computing
-Consortium. Google also developed a privacy analytics tool, Prochlo, based on
+SGX is the basis for multiple privacy-preserving machine learning schemes
+\cite{DBLP:conf/eurosp/ChengZKHHJJ0S19,tramer2018slalom,DBLP:journals/corr/abs-1803-05961}.
+The biggest barriers to adoption at this time is the availability of SGX in
+deployed servers and the lack of experience in enclave development by most
+parties. SGX is available on Microsoft Azure under the name Confidential
+Computing \cite{azure-confidential-computing}.  Microsoft is also making
+software tools available a part of the new Confidential Computing Consortium.
+Google also developed a privacy analytics tool, Prochlo \cite{prochlo}, based on
 SGX.
 
 \section{Mix Networks}
 
-\textbf{Mix networks} are protocols between mutually distrustful parties to
-shuffle values and unlink values from inputer’s identities. Traditionally these
-have been proposed for voting schemes and shuffling votes. A similar concept of
-a “mix zone” was proposed as a way of achieving k-anonymity of trajectories on
-maps.
+\textbf{Mix networks} \cite{DBLP:journals/cacm/Chaum81} are protocols between
+mutually distrustful parties to shuffle values and unlink values from inputer’s
+identities. Tor is the most well known mix net used practice and is intended to
+unlink someone's source IP address from destination IP addresses
+\cite{DBLP:conf/uss/DingledineMS04}. Mix nets also are often proposed in voting
+schemes to anonymously shuffle votes.
 
-\begin{marginfigure} \includegraphics[width=\linewidth]{mixnet} \caption{An
-example decryption mixnet between three parties. Each message is encrypted by a
-sequences of public keys. Each party in the mixnet removes one layer by
-decrypting using its own key then outputs messages in a random order.}
+\begin{marginfigure} \includegraphics[width=\linewidth]{mixnet}
+\caption{An example decryption mixnet between three parties. Each message is
+encrypted by a sequences of public keys. Each party in the mixnet removes one
+layer by decrypting using its own key then outputs messages in a random order.}
 \label{fig:mixnet} \end{marginfigure}
+
+In the scope of data sharing, mix networks can be used as a tool to allow third
+parties to unlink individual identities from data sets. For example, a similar
+concept of a “mix zone” was proposed as a way
+ of achieving $k$-anonymity of
+transit trajectories \cite{freudiger2007mix}.
 
 \section{Advanced Cryptography}
 
