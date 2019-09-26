@@ -88,10 +88,15 @@ analytics products. Facebook has used it as low as 20 for advertising products.
 Some government agencies use minimum thresholds of 3 before showing data.
 
 The privacy provided by $k$-anonymity depends on the underlying data set. One
-problem is \textbf{homogenous data}, where every member of a bin has some common
-trait. In Figure \ref{fig:kanon}, we know all 30-40 year olds were diagnosed with
-cancer. A second problem is deanonymizing people by joining
-\textbf{background knowledge} to a $k$-anonymous data set.
+problem is \textbf{homogenous data}, where every member of a bin has a common
+sensitive trait. In Figure \ref{fig:kanon}, we know all 30-40 year olds were
+diagnosed with cancer.
+
+A second problem is deanonymizing people by joining \textbf{background
+knowledge} to a $k$-anonymous data set. For example, again in  Figure
+\ref{fig:kanon}, one may know the incidence rate of specific diseases  across
+different nationalities. That could be used to infer the nationality of a given
+record, which had been redacted.
 
 \begin{marginfigure} \includegraphics[width=\linewidth]{kanon}
 \caption{A 4-anonymous table. Zip codes have been truncated, ages have been
@@ -121,11 +126,11 @@ universally unique identifiers (UUIDs) mapping to original values. This has the
 strongest security guarantee, but requires storing an entire mapping of the
 original data to token values.
 
-\textbf{Pseudorandom functions} (PRFs) are functions which take a secret key as
-input whose output is indistinguishable from randomness. Using PRFs for
-tokenization has similar security properties as random lookup tables, but
-without having to store the relationship. HMACs like HMAC-SHA256 are often
-used as PRFs in practice.
+ \textbf{Pseudorandom functions} (PRFs) are functions that take a secret key and
+ arbitrary data as input, and output values indistinguishable from randomness.
+ Rather than storing an entire table of random tokens, one can use a PRF to
+ tokenize data with only a secret key. HMACs like HMAC-SHA256 are often used
+ as PRFs in practice.
 
 \textbf{Format preserving encryption} \cite{DBLP:conf/sacrypt/BellareRRS09}
 (FPE) entails encrypting sensitive fields such that the output ciphertext has
@@ -161,28 +166,30 @@ individual which could be leaked from a dataset \cite{dwork2014algorithmic}.
 Differential privacy is used by the US Census \cite{census-differential-privacy},
 Apple \cite{apple-differential-privacy}, Google \cite{google-differential-privacy},
 Facebook \cite{facebook-url-release}, and Uber \cite{uber-differential-privacy}
-to protect research and user data. Fundamentally, achieving differential privacy
-means adding some form of noise or randomization while sacrificing some
-accuracy. In its most basic form, differential privacy specifies a numerical bound,
-$\epsilon$, on how much an algorithm’s output can change between two neighboring
-datasets that only differ in a single element. Part of the value of differential
-privacy is that $\epsilon$-private systems can be composed with easily
-understood properties. This lets one set a privacy budget and allow queries
-until that budget is exhausted.
+to protect research and user data.
+
+Fundamentally, achieving differential privacy means adding some form of noise or
+randomization while sacrificing some accuracy. In its most basic form,
+differential privacy specifies a numerical bound, $\epsilon$, on how much an
+algorithm’s output can change between two neighboring datasets that only differ
+in a single element. Part of the value of differential privacy is that
+$\epsilon$-private systems can be composed with easily understood properties.
+This lets one set a \textbf{privacy budget} and allow queries until that budget
+is exhausted.
 
 A \textbf{privacy mechanism} is an implementation that achieves some target
-$\epsilon$-privacy. A simple mechanism is randomized response, which was
-designed to allow people to answer surveys about sensitive topics. The idea is
-that you flip a coin Heads to either answer honestly (e.g. \textit{“Did you
-cheat on your taxes?”}) or Tails to commit to the answer with negative
+$\epsilon$-privacy. A simple mechanism is \textbf{randomized response}, which
+was designed to allow people to answer surveys about sensitive topics. The idea
+is that you flip a coin \textit{Heads} to either answer honestly (e.g. \textit{“Did you
+cheat on your taxes?”}) or \textit{Tails} to commit to the answer with negative
 connotations (\textit{“Yes”}). This gives the survey taker plausible deniability
-that they simply flipped a Tails. It is also easy to subtract the noise and
-estimate the true answer rate.
+that they simply flipped a \textit{Tails}. It is also easy to subtract the
+estimated noise and approximate the true answer rate.
 
-Another basic mechanism is the \textbf{Laplace Mechanism}, which adds randomly
-sampled noise from the Laplace distribution. This is a simple mechanism that is
-tunable to achieve any chosen level of $\epsilon$-privacy and does not depend on
-the domain of the input data.
+Another privacy mechanism is the \textbf{Laplace Mechanism}, which adds randomly
+sampled noise from the Laplace distribution, shown in Figure \ref{fig:laplace}.
+This is a simple mechanism that is tunable to achieve any chosen level of
+$\epsilon$-privacy and does not depend on the domain of the input data.
 
 \begin{marginfigure} \includegraphics[width=\linewidth]{laplace}
 \caption{Example of a Laplace distributions offering .5-differential privacy for
@@ -205,19 +212,18 @@ data with adversarial inputs, or unbounded numbers of queries.
 that preserve statistical properties. One example generated synthetic commuter
 patterns from private US Census data \cite{DBLP:conf/icde/MachanavajjhalaKAGV08}.
 
-Machine learning models trained on real
-data points can often be used to also generate sets of realistic-looking
-synthetic data. There are risks that unintentionally memorized data
-\cite{DBLP:journals/corr/abs-1802-08232} embedded in machine learning models
-could be output in synthetic data sets. Because of this risk, differential
-privacy is often coupled with synthetic data generation to ensure that output is
-private. NIST recently ran a contest for generating such differentially private
-synthetic data sets \cite{nist-synthetic-data}.
+Machine learning models trained on real data points can often be used to also
+generate sets of realistic-looking synthetic data. There are risks that
+unintentionally memorized data \cite{DBLP:journals/corr/abs-1802-08232} embedded
+in machine learning models could be output in synthetic data sets. Because of
+this risk, differential privacy is often coupled with synthetic data generation
+to ensure that output is private. NIST recently ran a contest for generating
+such differentially private synthetic data sets \cite{nist-synthetic-data}.
 
 \section{Secure Enclaves}
 
 \textbf{Secure enclaves} are a CPU technology that provide a safe place to run
-code and perform computations on an otherwise unsafe platform. Intel Software
+code and perform computations on an otherwise unsafe platform. Intel's Software
 Guard Extensions (SGX) \cite{intel-sgx} is one example of a more widely
 available enclave technology. In the context of privacy, enclaves allow one
 party (e.g. a regulator) to compute over another party’s private data (e.g. a
@@ -244,16 +250,28 @@ unlink someone's source IP address from destination IP addresses
 \cite{DBLP:conf/uss/DingledineMS04}. Mix nets also are often proposed in voting
 schemes to anonymously shuffle votes.
 
-\begin{marginfigure} \includegraphics[width=\linewidth]{mixnet} \caption{An
-example decryption mixnet between three parties. Each message is encrypted by a
-sequences of public keys. Each party in the mixnet removes one layer by
-decrypting using its own key then outputs messages in a random order.}
-\label{fig:mixnet} \end{marginfigure}
+%\begin{marginfigure} \includegraphics[width=\linewidth]{mixnet} \caption{An
+%example decryption mixnet between three parties. Each message is encrypted by a
+%sequences of public keys. Each party in the mixnet removes one layer by
+%decrypting using its own key then outputs messages in a random order.}
+%\label{fig:mixnet} \end{marginfigure}
+
+\begin{marginfigure} \includegraphics[width=\linewidth]{mixzone} \caption{
+An illustration of a mix zone. Three trajectories, \textbf{a}, \textbf{b}, and
+\textbf{c}, enter the zone and three trajectories \textbf{q}, \textbf{r}, and
+\textbf{s} exit it. The paths from ingress trajectories to egress
+trajectories is hidden and in this example gives 3-anonymity.
+Source: \cite{freudiger2007mix}}
+\label{fig:mixzone} \end{marginfigure}
 
 In the scope of data sharing, mix networks can be used as a tool to allow third
-parties to unlink individual identities from data sets. For example, a similar
-concept of a “mix zone” was proposed as a way of achieving $k$-anonymity of
-transit trajectories \cite{freudiger2007mix}.
+parties to unlink individual identities from data sets. For example, a
+concept of a \textbf{mix zone} was proposed as a way of achieving $k$-anonymity of
+transit trajectories \cite{freudiger2007mix}. A mix zone would be a geographic,
+high-traffic area where vehicle trajectories would not be logged. Upon leaving
+a mix zone, vehicles would be assigned new identities. If at least $k$ vehicles
+are in the mix zone at all times, each vehicle crossing through would be
+$k$-anonymous. An example mix zone is illustrated in Figure \ref{fig:mixzone}.
 
 \section{Advanced Cryptography}
 
@@ -268,21 +286,24 @@ digital currencies and will be discussed in the following section.
 
 Until recently, applications of multiparty computation (MPC) were limited to
 niche use cases like beet auctions \cite{DBLP:conf/fc/BogetoftCDGJKNNNPST09}.
-However, the combination of protocol improvements, instruction-level
-cryptographic primitives, and widespread adoption machine learning have let to
+However, the combination of protocol performance improvements, instruction-level
+cryptographic primitives, and wider use of machine learning have led to
 more MPC proposals for privacy-preserving machine learning, e.g.
 \cite{DBLP:conf/ccs/BonawitzIKMMPRS17}.
 
 Homomorphic encryption comes in two flavors: partial and fully.
 \textbf{Partially homomorphic encryption} has been supported for decades by many
 cryptosystems including RSA, ElGamal, and, most commonly, Paillier's
-\cite{DBLP:conf/eurocrypt/Paillier99}. One notable recent application of
-partially homomorphic encryption was by Google for \textbf{Private Set
-Intersection} (PSI) \cite{google-psi}. Google is likely using PSI to privately
-join advertising data with external data from credit card companies
-\cite{google-mastercard}. Private set intersection has a narrow scope, but is
-still useful for summing common values between two parties’ data sets without
-revealing their respective private data.
+\cite{DBLP:conf/eurocrypt/Paillier99}. Recently, Google applied partially
+homomorphic encryption for \textbf{Private Set Intersection} (PSI)
+\cite{google-psi}.
+
+Google is likely using PSI to privately join advertising data with external data
+from credit card companies \cite{google-mastercard}. The application is to
+attribute which ad impressions ultimately result in purchases, without either
+party sharing its respective ad impression data or purchase data. Private set
+intersection has a narrow scope, but is useful for summing common values between
+two parties’ data sets without revealing their respective private data.
 
 \textbf{Fully homomorphic encryption} (FHE) is a more powerful construction with
 the promise of being able to compute arbitrary circuits over encrypted data. It
@@ -298,7 +319,7 @@ called SEAL \cite{sealcrypto}.
 \label{verifiable}
 
 An underlying motivation for data sharing is that one party may not trust
-another to report honest aggregate data. For example, regulatory agencies
+another to honestly report aggregate data. For example, regulatory agencies
 conducting oversight may not trust aggregate data from service providers.
 \textbf{Verifiable data structures} allow parties to verify whether an element
 is a member of a set and, in some cases, whether it is a non-member.
@@ -354,7 +375,7 @@ desirable.
     \midrule
     Minimization & N/A & \textbf{Low} & \textbf{High} \\
     Redaction & Yes & \textbf{Low} & \textbf{High} \\
-    Aggregation & Yes & \textbf{Low} & High  \\
+    Aggregation & Yes & \textbf{Low} & \textbf{High}  \\
     Binning & Yes & \textbf{Low} & \textbf{High} \\
     $k$-anonymity & Yes & Medium & Medium  \\
     Tokenization & \textbf{No} & \textbf{Low} & High  \\
@@ -371,8 +392,6 @@ desirable.
   \end{tabular}
   \label{tab:normaltab}
 \end{table}
-
-\pagebreak
 
 \bibliography{priv-mech} \bibliographystyle{acm}
 
