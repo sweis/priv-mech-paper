@@ -1,7 +1,6 @@
 \documentclass[nobib]{tufte-handout}
 
-\title{Privacy Tools for Data Sharing}
-
+\title{Privacy Tools for Data Sharing \thanks{Draft Version 26.9.19}}
 \author[Stephen Weis]{Stephen Weis}
 
 \date{September 2019} % without \date command, current date is supplied
@@ -38,17 +37,21 @@
 \begin{abstract}
 
 \noindent This is an overview about common tools and definitions
-for anonymizing data or privately computing with other parties. It is roughly in
-order of practicality and maturity. \end{abstract}
+for anonymizing data or confidentially computing over private data.
+It is roughly in order of practicality and maturity, which is summarized
+at the end.
+\end{abstract}
 
-\section{Lossy Techniques} \textbf{Minimization} refers to collecting only the
-minimal data necessary for a specific purpose. \textbf{Redaction} deletes or
-censors data which has already been collected.
+\section{Information Reduction Techniques}
+
+\textbf{Minimization} refers to collecting the minimal data necessary for
+a specific purpose. \textbf{Redaction} deletes or censors data which has
+already been collected.
 
 \textbf{Aggregation} reduces a set of individual values to a smaller set of
-derived values. Summing or averaging are the most common aggregation operations.
-Training machine learning models or projecting high-dimensional data to lower
-dimensions can also be considered forms of aggregation.
+derived values, for example, summing or averaging a list of values into a single
+number. Training machine learning models or projecting high-dimensional data to
+lower dimensions are also forms of aggregation.
 
 \begin{marginfigure} \includegraphics[width=\linewidth]{binned}
 \caption{An example map of aggregated geolocation data, binned by neighborhood
@@ -56,31 +59,46 @@ and time.}
 \label{fig:binned} \end{marginfigure}
 
 \textbf{Binning} or \textbf{bucketing} is a common form of aggregation that
-generalizes quantitative values to buckets or ranges through rounding or
-truncation. Common examples are truncating GPS coordinates to 3 decimal
+groups values into buckets or ranges through rounding, truncation, or some
+other mapping. Examples might include truncating GPS coordinates to 3 decimal
 places or rounding time values to the nearest 15 minute period.
+
+\textbf{Top-coding} and \textbf{bottom-coding} are both types of binning which
+group together the tail ends of distributions, where there may be few samples.
+For instance, grouping ages of "Under 20", "20-45", "46-65", "Over 65" uses both
+bottom- and top-coding for the respective youngest and oldest groups.
 
 One concern with aggregation are \textbf{differencing attacks} which compare two
 aggregated values for different sets and extract the different individual input
-values. For example, given the average of Alice and Bob’s salary and the average
-of Alice, Bob, and Carol’s salary, you can learn Carol’s salary.
+values. For example, given the average of Alice and Bob’s salary (e.g. \$50k)
+and the average of Alice, Bob, and Carol’s salary (\$60k), you can learn
+Carol’s salary (\$80k). Data sets which differ in individual values are
+called \textbf{neighboring data}.
 
 \section{k-Anonymity and Extensions}
 
-Implicit in binning values for privacy is the notion of safety in numbers --
-that an individuals’ data will be grouped with others in the same bin to hide
-an individual's identity. The notion of \textbf{$k$-anonymity}
+Implicit in binning values for privacy is the notion of
+\textit{safety in numbers} -- that grouping an individual with others will hide
+that person's identity. The notion of \textbf{$k$-anonymity}
 \cite{DBLP:journals/ijufks/Sweene02} is that at least $k$ people will be in any
 given bin or group. Aggregated data, APIs, or visualization tools often have
-minimum thresholds before returning any data, so are $k$-anonymous in practice.
-Google often uses $k$ values of 1000 in their advertising and analytics products.
-Facebook has used it as low as 20 for advertising products.
+\textbf{minimum thresholds} before returning data, so are $k$-anonymous in
+practice. Google often uses $k$ values of 1000 in their advertising and
+analytics products. Facebook has used it as low as 20 for advertising products.
+Some government agencies use minimum thresholds of 3 before showing data.
 
-$K$-anonymity has some privacy issues in practice. First, some bins of data may
-be homogenous and all share sensitive traits. For example, a $k$-anonymous set
-of geolocations around a specific health clinic might imply health status for
-that entire group. A second problem is that background knowledge can be joined
-to a k-anonymous data set and be used to deanonymize people.
+The privacy provided by $k$-anonymity depends on the underlying data set. One
+problem is \textbf{homogenous data}, where every member of a bin has some common
+trait. In Figure \ref{fig:kanon}, we know all 30-40 year olds were diagnosed with
+cancer. A second problem is deanonymizing people by joining
+\textbf{background knowledge} to a $k$-anonymous data set.
+
+\begin{marginfigure} \includegraphics[width=\linewidth]{kanon}
+\caption{A 4-anonymous table. Zip codes have been truncated, ages have been
+top- and bottom-coded, and nationalities have been redacted so that each
+(zip code, age range) has 4 records associated with it. Source:
+\cite{DBLP:conf/icde/MachanavajjhalaGKV06}}
+\label{fig:kanon} \end{marginfigure}
 
 \textbf{$L$-diversity} \cite{DBLP:conf/icde/MachanavajjhalaGKV06} is an extension
 of $k$-anonymity that addresses the homogeneity issue by ensuring that sensitive
@@ -93,26 +111,29 @@ API \cite{google-risk-analysis}.
 
 \section{Pseudonymization and Tokenization}
 
-\textbf{Pseudonymization} or \textbf{tokenization} means replacing sensitive
+\textbf{Pseudonymization} or \textbf{tokenization} mean replacing sensitive
 values like names, credit card numbers, or phone numbers with surrogate or token
 values. These tokens retain their original relationship in the data set and are
 often used as database lookup keys.
 
-Tokenization often uses a \textbf{lookup table with random values} mapping to
-original values. This has the strongest security guarantee, but requires storing
-an entire table of the original data.
+Tokenization often uses a \textbf{lookup table with random values} or
+universally unique identifiers (UUIDs) mapping to original values. This has the
+strongest security guarantee, but requires storing an entire mapping of the
+original data to token values.
 
 \textbf{Pseudorandom functions} (PRFs) are functions which take a secret key as
-input whose output is indistinguishable from randomness. PRFs have similar
-security properties as random lookup tables, but without having to store the
-relationship. HMACs like HMAC-SHA256 are often used as PRFs in practice.
+input whose output is indistinguishable from randomness. Using PRFs for
+tokenization has similar security properties as random lookup tables, but
+without having to store the relationship. HMACs like HMAC-SHA256 are often
+used as PRFs in practice.
 
 \textbf{Format preserving encryption} \cite{DBLP:conf/sacrypt/BellareRRS09}
 (FPE) entails encrypting sensitive fields such that the output ciphertext has
 the same format as the input. For example, an format-preserving encrypted credit
-card would have 16 decimal digits. FPE allows ciphertext to be stored in existing data fields,
-like database columns, which may not be easily changed.
-AES FFX mode \cite{dworkin2016recommendation}
+card could have 16 decimal digits. FPE allows ciphertexts to be stored in
+existing data fields, like database columns, which may not be easily changed.
+FPE is also advantageous because, unlike PRFs, the original input data can be
+decrypted with the secret key. AES FFX mode \cite{dworkin2016recommendation}
 is one recent standard for FPE encryption.
 
 %\begin{marginfigure}
@@ -141,8 +162,8 @@ Differential privacy is used by the US Census \cite{census-differential-privacy}
 Apple \cite{apple-differential-privacy}, Google \cite{google-differential-privacy},
 Facebook \cite{facebook-url-release}, and Uber \cite{uber-differential-privacy}
 to protect research and user data. Fundamentally, achieving differential privacy
-means adding some form of noise or randomization while sacrificing accuracy. In
-its most basic form, differential privacy specifies a numerical bound,
+means adding some form of noise or randomization while sacrificing some
+accuracy. In its most basic form, differential privacy specifies a numerical bound,
 $\epsilon$, on how much an algorithm’s output can change between two neighboring
 datasets that only differ in a single element. Part of the value of differential
 privacy is that $\epsilon$-private systems can be composed with easily
@@ -181,7 +202,10 @@ data with adversarial inputs, or unbounded numbers of queries.
 \section{Synthetic Data}
 
 \textbf{Synthetic data} involves taking real data and generating fake data sets
-that preserve statistical properties. Machine learning models trained on real
+that preserve statistical properties. One example generated synthetic commuter
+patterns from private US Census data \cite{DBLP:conf/icde/MachanavajjhalaKAGV08}.
+
+Machine learning models trained on real
 data points can often be used to also generate sets of realistic-looking
 synthetic data. There are risks that unintentionally memorized data
 \cite{DBLP:journals/corr/abs-1802-08232} embedded in machine learning models
@@ -314,6 +338,13 @@ privately tallied, then available for audit to third parties.
 
 \section{Summary Table}
 
+This table summarizes the approaches discussed in this overview.
+\textit{Lossy} means that shared data does not contain the entire original
+data set or does not contain individual records. \textit{Complexity} is
+generally how complex a technology is and \textit{maturity} is a general
+sense of how much the approach has been adopted. \textbf{Bold} values are
+desirable.
+
 \begin{table}[ht]
   \centering
   \fontfamily{ppl}\selectfont
@@ -338,14 +369,10 @@ privately tallied, then available for audit to third parties.
     Verifiable Computation & \textbf{No} & High & Low \\
     \bottomrule
   \end{tabular}
-  \caption{This table summarizes the approaches discussed in this overview.
-  \textit{Lossy} means that shared data does not contain the entire original
-  data set or does not contain individual records. \textit{Complexity} is
-  generally how complex a technology is and \textit{maturity} is a general
-  sense of how much the approach has been adopted. \textbf{Bold} values are
-  desirable. }
   \label{tab:normaltab}
 \end{table}
+
+\pagebreak
 
 \bibliography{priv-mech} \bibliographystyle{acm}
 
