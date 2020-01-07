@@ -1,9 +1,9 @@
 \documentclass[nobib]{tufte-handout}
 
-\title{Privacy Tools for Data Sharing \thanks{Draft Version 26.9.19}}
+\title{Privacy Tools for Data Sharing}
 \author[Stephen Weis]{Stephen Weis}
 
-\date{September 2019} % without \date command, current date is supplied
+\date{January 2020} % without \date command, current date is supplied
 
 %\geometry{showframe} % display margins for debugging page layout
 
@@ -38,8 +38,8 @@
 
 \noindent This is an overview about common tools and definitions
 for anonymizing data or confidentially computing over private data.
-It is roughly in order of practicality and maturity, which is summarized
-at the end.
+It is roughly in order of practicality and maturity and is summarized in a
+table at the end.
 \end{abstract}
 
 \section{Information Reduction Techniques}
@@ -84,7 +84,7 @@ that person's identity. The notion of \textbf{$k$-anonymity}
 given bin or group. Aggregated data, APIs, or visualization tools often have
 \textbf{minimum thresholds} before returning data, so are $k$-anonymous in
 practice. Google often uses $k$ values of 1000 in their advertising and
-analytics products. Facebook has used it as low as 20 for advertising products.
+analytics products. Facebook has used $k$ values of 20 for advertising products.
 Some government agencies use minimum thresholds of 3 before showing data.
 
 The privacy provided by $k$-anonymity depends on the underlying data set. One
@@ -93,8 +93,8 @@ sensitive trait. In Figure \ref{fig:kanon}, we know all 30-40 year olds were
 diagnosed with cancer.
 
 A second problem is deanonymizing people by joining \textbf{background
-knowledge} to a $k$-anonymous data set. For example, again in  Figure
-\ref{fig:kanon}, one may know the incidence rate of specific diseases  across
+knowledge} to a $k$-anonymous data set. For example, again in Figure
+\ref{fig:kanon}, one may know the incidence rate of specific diseases across
 different nationalities. That could be used to infer the nationality of a given
 record, which had been redacted.
 
@@ -107,7 +107,7 @@ top- and bottom-coded, and nationalities have been redacted so that each
 
 \textbf{$L$-diversity} \cite{DBLP:conf/icde/MachanavajjhalaGKV06} is an extension
 of $k$-anonymity that addresses the homogeneity issue by ensuring that sensitive
-traits among bin have at least $l$ distinct values. \textbf{$T$-closeness}
+traits among bins have at least $l$ distinct values. \textbf{$T$-closeness}
 \cite{DBLP:conf/icde/LiLV07} is a further refinement that ensures that those
 distinct values are distributed similarly to the population that data are drawn
 from. Neither $l$-diversity nor $t$-closeness are widely used in practice,
@@ -126,11 +126,11 @@ universally unique identifiers (UUIDs) mapping to original values. This has the
 strongest security guarantee, but requires storing an entire mapping of the
 original data to token values.
 
- \textbf{Pseudorandom functions} (PRFs) are functions that take a secret key and
- arbitrary data as input, and output values indistinguishable from randomness.
- Rather than storing an entire table of random tokens, one can use a PRF to
- tokenize data with only a secret key. HMACs like HMAC-SHA256 are often used
- as PRFs in practice.
+\textbf{Pseudorandom functions} (PRFs) are functions that take a secret key and
+arbitrary data as input, and output fixed-length values indistinguishable from
+randomness. Rather than storing an entire table of random tokens, one can use a
+PRF to tokenize data with only a secret key. HMACs like HMAC-SHA256 are often
+used as PRFs in practice.
 
 \textbf{Format preserving encryption} \cite{DBLP:conf/sacrypt/BellareRRS09}
 (FPE) entails encrypting sensitive fields such that the output ciphertext has
@@ -169,22 +169,22 @@ Facebook \cite{facebook-url-release}, and Uber \cite{uber-differential-privacy}
 to protect research and user data.
 
 Fundamentally, achieving differential privacy means adding some form of noise or
-randomization while sacrificing some accuracy. In its most basic form,
-differential privacy specifies a numerical bound, $\epsilon$, on how much an
+randomization while sacrificing accuracy. In its most basic form, differential
+privacy specifies a numerical bound, $\epsilon$, on how much an
 algorithm’s output can change between two neighboring datasets that only differ
 in a single element. Part of the value of differential privacy is that
 $\epsilon$-private systems can be composed with easily understood properties.
-This lets one set a \textbf{privacy budget} and allow queries until that budget
-is exhausted.
+This lets one set a \textbf{privacy budget} and allow queries until that
+budget is exhausted.
 
-A \textbf{privacy mechanism} is an implementation that achieves some target
+A \textbf{privacy mechanism} is an implementation that achieves a target
 $\epsilon$-privacy. A simple mechanism is \textbf{randomized response}, which
 was designed to allow people to answer surveys about sensitive topics. The idea
-is that you flip a coin \textit{Heads} to either answer honestly (e.g. \textit{“Did you
-cheat on your taxes?”}) or \textit{Tails} to commit to the answer with negative
-connotations (\textit{“Yes”}). This gives the survey taker plausible deniability
-that they simply flipped a \textit{Tails}. It is also easy to subtract the
-estimated noise and approximate the true answer rate.
+is that you flip a coin \textit{Heads} to either answer honestly 
+(e.g. \textit{“Did you cheat on your taxes?”}) or \textit{Tails} to commit to
+the answer with negative connotations (\textit{“Yes”}). This gives the survey
+taker plausible deniability that they simply flipped a \textit{Tails}. It is
+also easy to subtract the estimated noise and approximate the true answer rate.
 
 Another privacy mechanism is the \textbf{Laplace Mechanism}, which adds randomly
 sampled noise from the Laplace distribution, shown in Figure \ref{fig:laplace}.
@@ -224,7 +224,7 @@ such differentially private synthetic data sets \cite{nist-synthetic-data}.
 
 \textbf{Secure enclaves} are a CPU technology that provide a safe place to run
 code and perform computations on an otherwise unsafe platform. Intel's Software
-Guard Extensions (SGX) \cite{intel-sgx} is one example of a more widely
+Guard Extension (SGX) \cite{intel-sgx} is one example of a more widely
 available enclave technology. In the context of privacy, enclaves allow one
 party (e.g. a regulator) to compute over another party’s private data (e.g. a
 service provider) without learning any of the service provider’s data.
@@ -248,7 +248,9 @@ mutually distrustful parties to shuffle values and unlink values from inputer’
 identities. Tor is the most well known mix net used practice and is intended to
 unlink someone's source IP address from destination IP addresses
 \cite{DBLP:conf/uss/DingledineMS04}. Mix nets also are often proposed in voting
-schemes to anonymously shuffle votes.
+schemes to anonymously shuffle votes. "Tumbler" services that mix
+cryptocurrency transactions to obscure the origins of funds are another form of
+mixnet.
 
 %\begin{marginfigure} \includegraphics[width=\linewidth]{mixnet} \caption{An
 %example decryption mixnet between three parties. Each message is encrypted by a
@@ -284,8 +286,8 @@ Garbled Circuits \cite{DBLP:conf/focs/Yao82b}.
 Zero-knowledge proofs have had the most recent adoption and development by
 digital currencies and will be discussed in the following section.
 
-Until recently, applications of multiparty computation (MPC) were limited to
-niche use cases like beet auctions \cite{DBLP:conf/fc/BogetoftCDGJKNNNPST09}.
+Until recently, real world applications of multiparty computation (MPC) were
+limited to niche use cases like beet auctions \cite{DBLP:conf/fc/BogetoftCDGJKNNNPST09}.
 However, the combination of protocol performance improvements, instruction-level
 cryptographic primitives, and wider use of machine learning have led to
 more MPC proposals for privacy-preserving machine learning, e.g.
@@ -312,8 +314,8 @@ implemented; albeit one trillion times slower than a native computation. After a
 decade of development, FHE performance has improved by orders of magnitude, but
 is still too slow for general use. FHE is not commonly used in practice, so
 standards for tools or protocols haven't emerged yet. However, companies
-are working on building libraries, for example Microsoft Research released a FHE library
-called SEAL \cite{sealcrypto}.
+are working on building libraries, for example Microsoft Research released a FHE
+library called SEAL \cite{sealcrypto}.
 
 \section{Verifiable Data \& Verifiable Computation}
 \label{verifiable}
